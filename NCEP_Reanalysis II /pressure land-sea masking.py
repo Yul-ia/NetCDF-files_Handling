@@ -10,14 +10,13 @@ os.chdir('d:/NCEP_R2')
 pres_origin = xr.open_dataset('pres.sfc.mon.mean.nc')
 mask_file = xr.open_dataset('landsea.nc')
 
-pres=pres_origin.pres # 각 년도 각 월의 기압
+pres = pres_origin.pres # 각 년도 각 월의 기압
 landsea = mask_file.land
 
 pres['land'] = landsea # pres array에 마스킹된 land 추가
 length_pres = len(pres)
 
 #%%
-### csv 생성
 pres_weight_lst = []
 time_for_df = []
 
