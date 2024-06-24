@@ -5,7 +5,7 @@ import pandas as pd
 import glob
 #%%
 os.getcwd()
-os.chdir('d:/NCEP_R2')
+os.chdir('')
 #%%
 pres_origin = xr.open_dataset('pres.sfc.mon.mean.nc')
 mask_file = xr.open_dataset('landsea.nc')
