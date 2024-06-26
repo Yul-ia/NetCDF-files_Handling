@@ -10,28 +10,35 @@ os.chdir('')
 pres_origin = xr.open_dataset('pres.sfc.mon.mean.nc')
 mask_file = xr.open_dataset('landsea.nc')
 
-pres = pres_origin.pres # 각 년도 각 월의 기압
+pres = pres_origin.pres # pressure for each year and each month
 landsea = mask_file.land
 
-pres['land'] = landsea # pres array에 마스킹된 land 추가
+pres['land'] = landsea # add masked land to the pres array
 length_pres = len(pres)
 
 #%%
 pres_weight_lst = []
 time_for_df = []
 
+weight = np.cos(np.deg2rad(pres[0]).lat)
+
+# Unit
+pa_to_hpa = 0.01 # [hPa]
+
 for i in range(length_pres):
-    weight = np.cos(np.deg2rad(pres[i]).lat)
+
     pres_weight = pres[i].where(pres[0].land==0).weighted(weight)
     result = pres_weight.mean(('lon','lat')).values
     
-    pres_weight_lst.append(result)
+    pres_time=str(pres[i].time.values)[:10]
     
-    pres_time = pres[i].time.values
+    # Unit conversion: pa -> hpa
+    result_hpa = result * pa_to_hpa # [hPa]
+    
+    pres_weight_lst.append(result_hpa)
     time_for_df.append(pres_time)
 
 new_df = pd.DataFrame({'time':time_for_df, 'pres_weight':pres_weight_lst})
-#%%
-### local에 저장
+
 os.getcwd()
 new_df.to_csv('pres_weight.csv')
