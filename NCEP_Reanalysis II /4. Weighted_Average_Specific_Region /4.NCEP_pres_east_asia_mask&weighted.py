@@ -69,7 +69,7 @@ for i in range(length_pres):
     time_lst.append(str(sel_new_grid.time[i].values)[:10])
     
 new_df = pd.DataFrame({'date':time_lst, 'glb_mean':glb_lst, 'ask_mean':ask_lst,
-                       'es_mean':es_lst, 'ys_mean':ys_lst, 'ecs_mean': es_lst})
+                       'es_mean':es_lst, 'ys_mean':ys_lst, 'ecs_mean': ecs_lst})
 new_df=new_df.round(2)
 new_df
 
