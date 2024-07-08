@@ -4,7 +4,7 @@ import pandas as pd
 import xarray as xr
 import datetime
 
-os.chdir('d://NCEP_R2')
+os.chdir('')
 
 ## air_ anorm df
 anom_path = 'anom_csv/'
