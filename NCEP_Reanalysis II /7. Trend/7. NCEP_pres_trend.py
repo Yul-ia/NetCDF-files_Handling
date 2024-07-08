@@ -4,7 +4,7 @@ import pandas as pd
 import xarray as xr
 import datetime
 
-os.chdir('d://NCEP_R2')
+os.chdir('')
 
 ## pres_ anorm df
 anom_path = 'anom_csv/'
@@ -35,7 +35,6 @@ pres_ask_trend = trend('ask_anom')
 pres_es_trend = trend('es_anom')
 pres_ys_trend = trend('ys_anom')
 pres_ecs_trend = trend('ecs_anom')
-
 
 os.getcwd()
 pres_glb_trend.to_csv('pres_glb_trend_new.csv',index=False)
