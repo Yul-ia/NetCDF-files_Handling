@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 import datetime
+from decimal import Decimal, ROUND_HALF_UP
 
 os.chdir('')
 
@@ -25,16 +26,14 @@ wind_clim = pd.read_csv(clim_path+'wind_longterm_east_asia_mask&weighted.csv')
 def change_type(col_name):
     col_name['date'] = pd.to_datetime(col_name['date'], format='%Y-%m-%d')
 
-### Anomalies def
 def anom_df(df_name,clim_df):
     df_name['month']=df_name['date'].dt.month
     df_name['year']= df_name['date'].dt.year
-    df_name=df_name.loc[df_name['year'].between(1991,2020)] # new clim
+    df_name=df_name.loc[df_name['year'].between(1991,2020)] # new_clim
 
-    df_name.sort_values(by=['month','year'],ascending=[True,True],inplace=True)
+    # df_name.sort_values(by=['month','year'],ascending=[True,True],inplace=True)## month - year
+    df_name.sort_values(by=['year','month'],ascending=[True,True],inplace=True)
 
-    df_name.drop(['month','year'], axis=1, inplace=True)
-    df_name.reset_index(drop=True)
 
     # climate average application
     for i in range(1, 13):
@@ -44,6 +43,13 @@ def anom_df(df_name,clim_df):
         df_name.loc[mon, 'es_clim'] = clim_df.loc[clim_df['month'] == i, 'es_clim'].values[0]
         df_name.loc[mon, 'ys_clim'] = clim_df.loc[clim_df['month'] == i, 'ys_clim'].values[0]
         df_name.loc[mon, 'ecs_clim'] = clim_df.loc[clim_df['month'] == i, 'ecs_clim'].values[0]
+        
+        df_name.loc[mon, 'glb_std'] = df_name.loc[df_name['month']==i,'glb_mean'].std() # ddof=0
+        df_name.loc[mon, 'ask_std'] = df_name.loc[df_name['month']==i,'ask_mean'].std()
+        df_name.loc[mon, 'es_std'] = df_name.loc[df_name['month']==i,'es_mean'].std()
+        df_name.loc[mon, 'ys_std'] = df_name.loc[df_name['month']==i,'ys_mean'].std()
+        df_name.loc[mon, 'ecs_std'] = df_name.loc[df_name['month']==i,'ecs_mean'].std()
+
 
     # anomaly appllication
     for idx, row in df_name.iterrows():
@@ -52,15 +58,19 @@ def anom_df(df_name,clim_df):
         df_name.loc[idx, 'es_anom'] = row['es_mean'] - row['es_clim']
         df_name.loc[idx, 'ys_anom'] = row['ys_mean'] - row['ys_clim']
         df_name.loc[idx, 'ecs_anom'] = row['ecs_mean'] - row['ecs_clim']
+        
+    df_name.drop(['month','year'], axis=1, inplace=True)
+    df_name.reset_index(drop=True)
 
 
-    df_name=df_name[['date', 'glb_mean', 'glb_clim', 'glb_anom','ask_mean', 'ask_clim', 'ask_anom','es_mean',
-        'es_clim', 'es_anom', 'ys_mean', 'ys_clim','ys_anom', 'ecs_mean', 'ecs_clim', 'ecs_anom']]
+    df_name=df_name[['date', 'glb_mean', 'glb_clim', 'glb_anom','glb_std','ask_mean', 'ask_clim', 'ask_anom','ask_std','es_mean',
+       'es_clim', 'es_anom','es_std', 'ys_mean', 'ys_clim','ys_anom', 'ys_std','ecs_mean', 'ecs_clim', 'ecs_anom','ecs_std']]
     
     df_name.reset_index(drop=True,inplace=True)
     
     return df_name
 
+## apply def
 change_type(air_mean)
 change_type(prate_mean)
 change_type(pres_mean)
@@ -76,9 +86,24 @@ prate_mean['unit'] = 'mm'
 pres_mean['unit'] = 'hPa'
 wind_mean['unit'] = 'm/s'
 
+# round def
+def round_up(num):
+    result = Decimal(num).quantize(Decimal('.00'),rounding=ROUND_HALF_UP)
+    return result
+
+def round_up_df(df_name):
+    df_cols = df_name.select_dtypes(include=['float64', 'int64']).columns
+    df_name[df_cols] = df_name[df_cols].applymap(round_up)
+    
+       
+# round_up_df(air_mean)
+# round_up_df(prate_mean)
+# round_up_df(pres_mean)
+# round_up_df(wind_mean)
+
 # os.getcwd()
-### save csv
-air_mean.to_csv('air_anom_new.csv',index=False)
-prate_mean.to_csv('prate_anom_new.csv',index=False)
-pres_mean.to_csv('pres_anom_new.csv',index=False)
-wind_mean.to_csv('wind_anom_new.csv',index=False)
+
+air_mean.to_csv('air_anom_std_new.csv',index=False)
+prate_mean.to_csv('prate_anom_std_new.csv',index=False)
+pres_mean.to_csv('pres_anom_std_new.csv',index=False)
+wind_mean.to_csv('wind_anom_std_new.csv',index=False)
