@@ -6,7 +6,7 @@ import math
 import datetime
 from dateutil.relativedelta import relativedelta
 os.getcwd()
-os.chdir('D:/NCEP_R2')
+os.chdir('')
 
 prate_origin = xr.open_dataset('prate.sfc.mon.mean.nc')
 mask_file =xr.open_dataset('landsea.nc')
