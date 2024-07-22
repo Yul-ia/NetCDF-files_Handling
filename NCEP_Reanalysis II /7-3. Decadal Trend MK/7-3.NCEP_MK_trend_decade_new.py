@@ -22,9 +22,10 @@ def change_type(df_name):
 
 # (df_name,area,star_year=int(),end_year=int()+1)
 def decade_trend(df_name,area,star_year=int(),end_year=int()+1):
-    trend_df= pd.DataFrame(columns=['year','jan_trend','feb_tren', 'mar_trend','apr_trend',
-                                        'may_trend' ,'jun_trend' ,'jul_trend','aug_trend','sep_trend','oct_trend','nov_trend','dec_trend'])
-
+    
+    trend_df= pd.DataFrame(columns=['year','jan_trend','jan_p_value','feb_trend','feb_p_value', 'mar_trend','mar_p_value','apr_trend','apr_p_value',
+                                        'may_trend','may_p_value' ,'jun_trend' ,'jun_p_value','jul_trend','jul_p_value','aug_trend','aug_p_value',
+                                        'sep_trend','sep_p_value','oct_trend','oct_p_value','nov_trend','nov_p_value','dec_trend','dec_p_value'])
     for start_year in range(star_year, end_year, 10):
         end_year = start_year + 9
         decade_df = df_name[(df_name['date'].dt.year >= start_year) & (df_name['date'].dt.year <= end_year)]
@@ -35,14 +36,26 @@ def decade_trend(df_name,area,star_year=int(),end_year=int()+1):
         for i in range(1, 13):
             month= decade_df[decade_df['date'].dt.month == i]
             
-            if len(month) > 0:
+            odd= (i - 1) * 2 + 1  
+            even = (i - 1) * 2 + 2 
+            
+            if not month.empty and len(month[area].unique()) > 1:
                 man = mk.original_test(month[area])
-                row_data[trend_df.columns[i]] = man.slope
+                row_data[trend_df.columns[odd]] = man.slope
+                row_data[trend_df.columns[even]] = man.p
+            else:
+                row_data[trend_df.columns[odd]] = np.nan
+                row_data[trend_df.columns[even]] = np.nan
+            
+            
+            # if len(month) > 0:
+            #     man = mk.original_test(month[area])
+            #     row_data[trend_df.columns[i]] = man.slope
                 
         trend_df = pd.concat([trend_df, pd.DataFrame([row_data])], ignore_index=True)
     return trend_df
 
-#%%
+
 df_lst = [air_anom_new, prate_anom_new, pres_anom_new, wind_anom_new]
 var_lst = ['air','prate','pres','wind']
 
@@ -80,8 +93,7 @@ wind_ys_decadal_trend = decade_trend(wind_anom_new, 'ys_anom', 1991, 2020)
 wind_ecs_decadal_trend = decade_trend(wind_anom_new, 'ecs_anom', 1991, 2020)
 
 
-
-# round df
+### round def
 def round_up(num):
     result = Decimal(num).quantize(Decimal('.00'),rounding=ROUND_HALF_UP)
     return result
@@ -95,7 +107,6 @@ def round_up_df(df_name):
 # round_up_df(air_ask_decadal_trend)
 # round_up_df(air_es_decadal_trend)
 # round_up_df(air_ecs_decadal_trend)
-
 
 os.getcwd()
 air_glb_decadal_trend.to_csv('air_glb_decadal_trend_new_MK.csv',index=False)
@@ -121,5 +132,4 @@ wind_ask_decadal_trend.to_csv('wind_ask_decadal_trend_new_MK.csv',index=False)
 wind_es_decadal_trend.to_csv('wind_es_decadal_trend_new_MK.csv',index=False)
 wind_ys_decadal_trend.to_csv('wind_ys_decadal_trend_new_MK.csv',index=False)
 wind_ecs_decadal_trend.to_csv('wind_ecs_decadal_trend_new_MK.csv',index=False)
-
 
