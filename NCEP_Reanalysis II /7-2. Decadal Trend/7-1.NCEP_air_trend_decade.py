@@ -43,6 +43,15 @@ def decade_trend(area):
         trend_df = trend_df.append(row_data, ignore_index=True)
     return trend_df
 
+## round def
+def round_up(num):
+    result = Decimal(num).quantize(Decimal('.00'),rounding=ROUND_HALF_UP)
+    return result
+
+def round_up_df(df_name):
+    df_cols = df_name.select_dtypes(include=['float64', 'int64']).columns
+    df_name[df_cols] = df_name[df_cols].applymap(round_up)
+       
 
 change_type(air_anom)
 
@@ -54,15 +63,7 @@ air_ecs_decadal_trend = decade_trend('ecs_anom')
 
 # air_glb_trend=air_glb_trend.round(2)
 
-## round def
-def round_up(num):
-    result = Decimal(num).quantize(Decimal('.00'),rounding=ROUND_HALF_UP)
-    return result
 
-def round_up_df(df_name):
-    df_cols = df_name.select_dtypes(include=['float64', 'int64']).columns
-    df_name[df_cols] = df_name[df_cols].applymap(round_up)
-       
 # round_up_df(air_glb_decadal_trend)
 # round_up_df(air_ask_decadal_trend)
 # round_up_df(air_es_decadal_trend)
